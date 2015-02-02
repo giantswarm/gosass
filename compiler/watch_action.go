@@ -5,6 +5,7 @@ import (
     "gopkg.in/fsnotify.v1"
     "os"
     "time"
+    "errors"
     "path/filepath"
 )
 
@@ -17,6 +18,16 @@ type SassWatcher struct {
 }
 
 func NewSassWatcher(ctx SassContext) (*SassWatcher, error) {
+    info, err := os.Stat(ctx.inputPath)
+
+    if err != nil {
+        return nil, err
+    }
+
+    if !info.IsDir() {
+        return nil, errors.New("Input must be a directory")
+    }
+
     filecache := NewFileCache()
 
     // Create the watcher
@@ -28,27 +39,19 @@ func NewSassWatcher(ctx SassContext) (*SassWatcher, error) {
 
     watcher.Add(ctx.inputPath)
 
-    info, err := os.Stat(ctx.inputPath)
+    // Add subdirectories to be watched
+    err = filepath.Walk(ctx.inputPath, func(path string, info os.FileInfo, err error) error {
+        if err != nil {
+            return err
+        } else if info.IsDir() {
+            watcher.Add(path)
+        }
+
+        return nil
+    })
 
     if err != nil {
         return nil, err
-    }
-
-    if info.IsDir() {
-        // Add subdirectories to be watched
-        err := filepath.Walk(ctx.inputPath, func(path string, info os.FileInfo, err error) error {
-            if err != nil {
-                return err
-            } else if info.IsDir() {
-                watcher.Add(path)
-            }
-
-            return nil
-        })
-
-        if err != nil {
-            return nil, err
-        }
     }
 
     return &SassWatcher {

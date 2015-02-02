@@ -33,10 +33,3 @@ gosass -input sass/ -output css/
 # Live-compile a directory
 gosass -input sass/ -output css/ -watch
 ```
-
-## Caveats ##
-
-* Due to limitations in the underlying watching library that we use, you
-  cannot effectively watch an individual file. It'll compile the file, but
-  successive changes won't be registered. Watching directories works fine
-  though.
