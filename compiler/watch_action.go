@@ -115,8 +115,6 @@ func (self *SassWatcher) listener() {
     for {
         select {
         case event := <- self.watcher.Events:
-            println(event.Op, event.Name)
-
             if event.Op & fsnotify.Create == fsnotify.Create || event.Op & fsnotify.Write == fsnotify.Write {
                 err := self.stage(event.Name)
 
