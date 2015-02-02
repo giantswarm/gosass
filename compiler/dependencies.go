@@ -22,6 +22,7 @@ func NewSassDependencyResolver(filecache *FileCache) *SassDependencyResolver {
     }
 }
 
+// Gets the files imported directly by the given file
 func (self *SassDependencyResolver) shallowResolve(path string) ([]string, error) {
     deps, ok := self.shallowDeps[path]
 
@@ -50,6 +51,7 @@ func (self *SassDependencyResolver) shallowResolve(path string) ([]string, error
     return deps, nil
 }
 
+// Gets all files imported by the given file, including indirect imports
 func (self *SassDependencyResolver) Resolve(path string) ([]string, error) {
     abs, err := filepath.Abs(path)
 
@@ -104,6 +106,7 @@ func (self *SassDependencyResolver) Resolve(path string) ([]string, error) {
     return deps, nil
 }
 
+// Gets what files are dependent on the given file, including indirectly
 func (self *SassDependencyResolver) ReverseResolve(path string) ([]string, error) {
     abs, err := filepath.Abs(path)
 
@@ -125,6 +128,7 @@ func (self *SassDependencyResolver) ReverseResolve(path string) ([]string, error
     return reverseDeps, nil
 }
 
+// Invalidates the cached entry for the given file
 func (self *SassDependencyResolver) Invalidate(path string) error {
     abs, err := filepath.Abs(path)
 

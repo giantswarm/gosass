@@ -4,6 +4,7 @@ import (
     "path/filepath"
 )
 
+// Stores contextual information for CLI invocations
 type SassContext struct {
     cmd *SassCommand
     inputPath string
@@ -18,6 +19,8 @@ func NewSassContext(cmd *SassCommand, inputPath string, outputPath string) SassC
     }
 }
 
+// Gets the equivalent output path for the given path. The given path must be
+// within the `inputPath`, but it may be in absolute or relative form.
 func (self SassContext) resolveOutputPath(p string) string {
     if filepath.IsAbs(p) {
         absInput, err := filepath.Abs(self.inputPath)
@@ -41,6 +44,7 @@ func (self SassContext) resolveOutputPath(p string) string {
         p = np //QED
     }
 
+    // Replace .scss with .css
     np := filepath.Join(self.outputPath, p)
     ext := filepath.Ext(np)
 

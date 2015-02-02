@@ -8,6 +8,7 @@ import (
     "path/filepath"
 )
 
+// Finds what files are sass compilable in the context's `inputPath`.
 func findCompilable(ctx SassContext) map[string]string {
     compilable := make(map[string]string, 100)
 
@@ -24,6 +25,7 @@ func findCompilable(ctx SassContext) map[string]string {
     return compilable
 }
 
+// Handles stdin/stderr from a process and pipes it to the log
 func redirectProcessOutput(name string, pipe io.ReadCloser) {
     scanner := bufio.NewScanner(pipe)
 
@@ -36,6 +38,7 @@ func redirectProcessOutput(name string, pipe io.ReadCloser) {
     }
 }
 
+// Compiles an individual file
 func compile(ctx SassContext, inputPath string, outputPath string) error {
     err := os.MkdirAll(filepath.Dir(outputPath), os.ModePerm)
 
@@ -68,6 +71,7 @@ func compile(ctx SassContext, inputPath string, outputPath string) error {
     return cmd.Wait()
 }
 
+// Compiles many files, as a mapping of input file path -> output file path
 func compileMany(ctx SassContext, mapping map[string]string) bool {
     remaining := len(mapping)
     errorChans := make(map[string]chan error, remaining * 2)

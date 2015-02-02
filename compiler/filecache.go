@@ -5,6 +5,7 @@ import (
     "path/filepath"
 )
 
+// Gets files, storing the contents in-memory for faster future lookups
 type FileCache struct {
     cache map[string][]byte
 }
@@ -15,6 +16,7 @@ func NewFileCache() *FileCache {
     }
 }
 
+// Gets the given file
 func (self *FileCache) Get(path string) ([]byte, error) {
     abs, err := filepath.Abs(path)
 

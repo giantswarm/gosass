@@ -35,6 +35,7 @@ func NewSassWatcher(ctx SassContext) (*SassWatcher, error) {
     }
 
     if info.IsDir() {
+        // Add subdirectories to be watched
         err := filepath.Walk(ctx.inputPath, func(path string, info os.FileInfo, err error) error {
             if err != nil {
                 return err
@@ -106,10 +107,13 @@ func (self *SassWatcher) stage(path string) error {
     return nil
 }
 
+// Listens for changes in the watched directory/file
 func (self *SassWatcher) listener() {
     for {
         select {
         case event := <- self.watcher.Events:
+            println(event.Op, event.Name)
+
             if event.Op & fsnotify.Create == fsnotify.Create || event.Op & fsnotify.Write == fsnotify.Write {
                 err := self.stage(event.Name)
 
@@ -129,6 +133,7 @@ func (self *SassWatcher) listener() {
     }
 }
 
+// Compiles files that are staged
 func (self *SassWatcher) compile() {
     if len(self.staged) > 0 {
         compileMany(self.ctx, self.staged)
@@ -136,6 +141,7 @@ func (self *SassWatcher) compile() {
     }
 }
 
+// CLI endpoint for watching
 func Watch(ctx SassContext) {
     watcher, err := NewSassWatcher(ctx)
 
@@ -160,7 +166,9 @@ func Watch(ctx SassContext) {
 
     go watcher.listener()
 
-    // Periodically recompile any staged items
+    // Periodically recompile any staged items. We do it this way to avoid
+    // both issues with redundant watcher events on mac, and to prevent the
+    // same file from getting compiled many times.
     for {
         watcher.compile()
         time.Sleep(100 * time.Millisecond)
