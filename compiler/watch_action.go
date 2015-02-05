@@ -150,15 +150,8 @@ func Watch(ctx SassContext) {
         log.Fatalf("Could not start watching: %s", err.Error())
     }
 
-    // Make an initial compile of the files. This is done before watching.
-    // While there is a minor possibility of files changing between here and
-    // the watch beginning, the alternative would leak goroutines when the
-    // initial compile fails.
+    // Make an initial compile of the files
     compilable := findCompilable(ctx)
-
-    if compileMany(ctx, compilable) {
-        os.Exit(1)
-    }
 
     // Warm up the dependency cache
     for path := range compilable {
@@ -166,6 +159,10 @@ func Watch(ctx SassContext) {
     }
 
     go watcher.listener()
+
+    if compileMany(ctx, compilable) {
+        os.Exit(1)
+    }
 
     // Periodically recompile any staged items. We do it this way to avoid
     // both issues with redundant watcher events on mac, and to prevent the
