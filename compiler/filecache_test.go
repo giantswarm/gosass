@@ -1,7 +1,7 @@
 package compiler
 
 import (
-    "testing"
+	"testing"
 )
 
 const EXPECTED_FILE = `body {
@@ -10,49 +10,48 @@ const EXPECTED_FILE = `body {
 `
 
 func TestFileCacheInvalidate(t *testing.T) {
-    t.Parallel()
+	t.Parallel()
 
-    fc := NewFileCache()
+	fc := NewFileCache()
 
-    // Make sure we can arbitrarily invalidate
-    err := fc.Invalidate("some/random/path")
+	// Make sure we can arbitrarily invalidate
+	err := fc.Invalidate("some/random/path")
 
-    if err != nil {
-        t.Error(err)
-    }
+	if err != nil {
+		t.Error(err)
+	}
 }
 
 func TestFileCacheGet(t *testing.T) {
-    t.Parallel()
+	t.Parallel()
 
-    fc := NewFileCache()
+	fc := NewFileCache()
 
-    checkFile := func() {
-        contents, err := fc.Get("../integration/src/01.simple.scss")
+	checkFile := func() {
+		contents, err := fc.Get("../integration/src/01.simple.scss")
 
-        if err != nil {
-            t.Error(err)
-        }
+		if err != nil {
+			t.Error(err)
+		}
 
-        if string(contents) != EXPECTED_FILE {
-            t.Errorf("Unexpected file contents: %s", string(contents))
-        }
-    }
+		if string(contents) != EXPECTED_FILE {
+			t.Errorf("Unexpected file contents: %s", string(contents))
+		}
+	}
 
-    // Get a file (uncached)
-    checkFile()
+	// Get a file (uncached)
+	checkFile()
 
-    // Reget the file - should hit the cache
-    checkFile()
+	// Reget the file - should hit the cache
+	checkFile()
 
-    // Invalidate the file
-    err := fc.Invalidate("../integration/src/01.simple.scss")
+	// Invalidate the file
+	err := fc.Invalidate("../integration/src/01.simple.scss")
 
-    if err != nil {
-        t.Error(err)
-    }
+	if err != nil {
+		t.Error(err)
+	}
 
-    // Get the file one last time - should be uncached again
-    checkFile()
+	// Get the file one last time - should be uncached again
+	checkFile()
 }
-

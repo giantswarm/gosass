@@ -1,7 +1,7 @@
 package compiler
 
 import (
-    "testing"
+	"testing"
 )
 
 const EXPECTED_STDOUT = `Usage: sassc [options] [INPUT] [OUTPUT]
@@ -23,19 +23,19 @@ Options:
 // Both tests that the SassCommand struct works, and that the correct sassc
 // version is installed
 func TestSassCommand(t *testing.T) {
-    t.Parallel()
+	t.Parallel()
 
-    cmd := NewSassCommand()
-    cmd.AddArgument("--help")
-    proc := cmd.Create("a", "b")
+	cmd := NewSassCommand()
+	cmd.AddArgument("--help")
+	proc := cmd.Create("a", "b")
 
-    stdout, err := proc.Output()
+	stdout, err := proc.Output()
 
-    if err != nil {
-        t.Error(err)
-    }
+	if err != nil {
+		t.Error(err)
+	}
 
-    if string(stdout) != EXPECTED_STDOUT {
-        t.Errorf("Unexpected stdout: %s", stdout)
-    }
+	if string(stdout) != EXPECTED_STDOUT {
+		t.Errorf("Unexpected stdout: %s", stdout)
+	}
 }
