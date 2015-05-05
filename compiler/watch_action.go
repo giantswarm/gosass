@@ -11,13 +11,13 @@ import (
 
 type SassWatcher struct {
 	watcher   *fsnotify.Watcher
-	ctx       SassContext
+	ctx       *SassContext
 	filecache *FileCache
 	deps      *SassDependencyResolver
 	staged    map[string]string
 }
 
-func NewSassWatcher(ctx SassContext) (*SassWatcher, error) {
+func NewSassWatcher(ctx *SassContext) (*SassWatcher, error) {
 	info, err := os.Stat(ctx.inputPath)
 
 	if err != nil {
@@ -129,7 +129,9 @@ func (self *SassWatcher) listener() {
 				}
 			}
 		case err := <-self.watcher.Errors:
-			log.Fatalf("Watcher error: %s", err.Error())
+			if err != nil {
+				log.Fatalf("Watcher error: %s", err.Error())
+			}
 		}
 	}
 }
@@ -143,7 +145,7 @@ func (self *SassWatcher) compile() {
 }
 
 // CLI endpoint for watching
-func Watch(ctx SassContext) {
+func Watch(ctx *SassContext) {
 	watcher, err := NewSassWatcher(ctx)
 
 	if err != nil {

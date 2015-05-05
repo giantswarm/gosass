@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"runtime/pprof"
+	"strings"
 )
 
 func main() {
@@ -21,6 +22,7 @@ func main() {
 	var cpuProfile = flag.String("cpuprofile", "", "Write CPU profile to file.")
 	var inputPath = flag.String("input", "", "Input file or directory.")
 	var outputPath = flag.String("output", "", "Output file or directory.")
+	var plugins = flag.String("plugins", "", "Comma-separated list of pingo plugins to load for custom sass functionality.")
 
 	flag.Parse()
 
@@ -89,6 +91,15 @@ func main() {
 	}
 
 	ctx := compiler.NewSassContext(cmd, *inputPath, *outputPath)
+
+	pluginsList := strings.Split(*plugins, ",")
+
+	for _, pluginPath := range pluginsList {
+		ctx.AddPlugin(pluginPath)
+	}
+
+	ctx.Start()
+	defer ctx.Stop()
 
 	if *watch {
 		compiler.Watch(ctx)
