@@ -5,7 +5,7 @@ import (
 )
 
 // CLI endpoint for compiling
-func Compile(ctx SassContext) {
+func Compile(ctx *SassContext) {
 	if compileMany(ctx, findCompilable(ctx)) {
 		os.Exit(1)
 	}
