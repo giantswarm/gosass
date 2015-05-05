@@ -37,7 +37,6 @@ func NewSassWatcher(ctx *SassContext) (*SassWatcher, error) {
 		return nil, err
 	}
 
-	defer watcher.Close()
 	watcher.Add(ctx.inputPath)
 
 	// Add subdirectories to be watched

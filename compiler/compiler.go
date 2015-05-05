@@ -11,6 +11,10 @@ import (
 	"sync"
 )
 
+const (
+	MAX_CONCURRENT_COMPILES = 4
+)
+
 // Finds what files are sass compilable in the context's `inputPath`.
 func findCompilable(ctx *SassContext) map[string]string {
 	compilable := make(map[string]string, 100)
@@ -139,6 +143,7 @@ func compile(ctx *SassContext, inputPath string, outputPath string) error {
 // Compiles many files, as a mapping of input file path -> output file path
 func compileMany(ctx *SassContext, mapping map[string]string) bool {
 	remaining := len(mapping)
+	lock := make(chan bool, MAX_CONCURRENT_COMPILES)
 	errorChans := make(map[string]chan error, remaining*2)
 
 	for inputPath, outputPath := range mapping {
@@ -146,6 +151,9 @@ func compileMany(ctx *SassContext, mapping map[string]string) bool {
 		errorChans[inputPath] = errorChan
 
 		go func(inputPath string, outputPath string, errorChan chan error) {
+			lock <- true
+			defer func() { <-lock }()
+
 			err := compile(ctx, inputPath, outputPath)
 			errorChan <- err
 		}(inputPath, outputPath, errorChan)
