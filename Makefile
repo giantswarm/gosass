@@ -1,6 +1,7 @@
 all: build
 
 build:
+	go get ./...
 	go build .
 
 install: build
