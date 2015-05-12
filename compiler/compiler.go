@@ -1,14 +1,12 @@
 package compiler
 
 import (
-	"bufio"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
-	"sync"
+	"strings"
 )
 
 const (
@@ -32,40 +30,10 @@ func findCompilable(ctx *SassContext) map[string]string {
 	return compilable
 }
 
-func captureStdout(wg sync.WaitGroup, errorChan chan error, resultsChan chan string, stdout io.ReadCloser) {
-	wg.Add(1)
-	defer wg.Done()
-
-	stdoutBytes, err := ioutil.ReadAll(stdout)
-
-	if err != nil {
-		errorChan <- err
-	}
-
-	resultsChan <- string(stdoutBytes)
-}
-
-func captureStderr(wg sync.WaitGroup, errorChan chan error, stderr io.ReadCloser) {
-	wg.Add(1)
-	defer wg.Done()
-
-	stderrScanner := bufio.NewScanner(stderr)
-
-	for stderrScanner.Scan() {
-		log.Print(stderrScanner.Text())
-	}
-
-	if err := stderrScanner.Err(); err != nil {
-		errorChan <- err
-	}
-}
-
 // Compiles an individual file
 func compile(ctx *SassContext, inputPath string, outputPath string) error {
 	// Create the parent directory
-	err := os.MkdirAll(filepath.Dir(outputPath), os.ModePerm)
-
-	if err != nil {
+	if err := os.MkdirAll(filepath.Dir(outputPath), os.ModePerm); err != nil {
 		return err
 	}
 
@@ -91,32 +59,38 @@ func compile(ctx *SassContext, inputPath string, outputPath string) error {
 	defer stderr.Close()
 
 	// Run the command
-	err = cmd.Start()
+	if err := cmd.Start(); err != nil {
+		return err
+	}
+
+	// Handle stdout
+	stdoutBytes, err := ioutil.ReadAll(stdout)
 
 	if err != nil {
 		return err
 	}
 
-	// Handle stdout/stderr
-	var wg sync.WaitGroup
-	errorChan := make(chan error, 2)
-	stdoutChan := make(chan string, 1)
-	go captureStdout(wg, errorChan, stdoutChan, stdout)
-	go captureStderr(wg, errorChan, stderr)
-
-	err = cmd.Wait()
+	// Handle stderr
+	stderrBytes, err := ioutil.ReadAll(stderr)
 
 	if err != nil {
 		return err
 	}
 
-	wg.Wait()
-
-	if len(errorChan) > 0 {
-		return <-errorChan
+	// Wait for the command to finish
+	if err := cmd.Wait(); err != nil {
+		return err
 	}
 
-	stdoutString := <-stdoutChan
+	// Print out stderr
+	if len(stderrBytes) > 0 {
+		for _, line := range strings.Split(string(stderrBytes), "\n") {
+			log.Print(line)
+		}
+	}
+
+	// Process the results
+	stdoutString := string(stdoutBytes)
 
 	for _, plugin := range ctx.plugins {
 		objs, err := plugin.Objects()
