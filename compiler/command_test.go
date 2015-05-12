@@ -27,7 +27,7 @@ func TestSassCommand(t *testing.T) {
 
 	cmd := NewSassCommand()
 	cmd.AddArgument("--help")
-	proc := cmd.Create("a", "b")
+	proc := cmd.Create("a")
 
 	stdout, err := proc.Output()
 
