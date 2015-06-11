@@ -95,7 +95,9 @@ func main() {
 	pluginsList := strings.Split(*plugins, ",")
 
 	for _, pluginPath := range pluginsList {
-		ctx.AddPlugin(pluginPath)
+		if pluginPath != "" {
+			ctx.AddPlugin(pluginPath)
+		}
 	}
 
 	ctx.Start()
