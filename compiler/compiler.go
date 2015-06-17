@@ -78,15 +78,18 @@ func compile(ctx *SassContext, inputPath string, outputPath string) error {
 	}
 
 	// Wait for the command to finish
-	if err := cmd.Wait(); err != nil {
-		return err
-	}
+	waitErr := cmd.Wait()
 
 	// Print out stderr
 	if len(stderrBytes) > 0 {
 		for _, line := range strings.Split(string(stderrBytes), "\n") {
 			log.Print(line)
 		}
+	}
+
+	// Return any error that happened on process.Wait()
+	if waitErr != nil {
+		return waitErr
 	}
 
 	// Process the results
