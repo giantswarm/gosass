@@ -163,7 +163,7 @@ func Watch(ctx *SassContext) {
 	go watcher.listener()
 
 	if compileMany(ctx, compilable) {
-		os.Exit(1)
+		log.Fatalf("Bailing due to compilation errors on the first pass")
 	}
 
 	// Periodically recompile any staged items. We do it this way to avoid
