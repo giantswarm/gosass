@@ -21,6 +21,26 @@ make install
 popd
 ```
 
+## Installation in Docker ##
+
+### Compile gosass
+
+```bash
+sudo docker run --rm -v "$PWD":/usr/src/myapp -w /usr/src/myapp golang:1.4 bash -c "go get ./... ; CGO_ENABLED=0 go build -a -installsuffix cgo && mv myapp gosass"
+```
+
+### Build Docker image
+```bash
+sudo docker build -t local/gosass .
+```
+
+### Run Docker container
+```bash
+sudo docker run -ti --rm -v $PWD:$PWD -w $PWD local/gosass -input webapp/scss/ -output webapp/static/css/ -style compressed
+```
+
+Append `-watch` if wanted.
+
 ## Example Usage ##
 
 ```bash
