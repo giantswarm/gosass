@@ -1,11 +1,10 @@
 FROM jbergknoff/sass
 
-RUN cp /usr/bin/sass /usr/bin/sassc
-COPY gosass /usr/bin/
+RUN ln -s /usr/bin/sass /usr/bin/sassc
+RUN apk update && apk add curl \
+  && curl -SL https://github.com/giantswarm/gosass/releases/download/v0.1.0/gosass \
+    -o /usr/bin/gosass \
+  && chmod u+x /usr/bin/gosass \
+  && apk del curl
 
 ENTRYPOINT ["gosass"]
-
-# sudo docker build -t local/gosass .
-
-# cd $GITHUB/giantswarm/giantswarmio-webapp
-# sudo docker run -ti --rm -v $PWD:$PWD -w $PWD local/gosass -input webapp/scss/ -output webapp/static/css/ -style compressed
